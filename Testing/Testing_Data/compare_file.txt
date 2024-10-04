@@ -1,0 +1,18 @@
+Pattern1
+Size: 0.1
+Class_id:12
+Pattern2
+Size:23
+Class_id:5
+Pattern3
+Size:0.01
+Class_id:12
+Pattern4
+Size: 2
+Class_id:12
+Pattern5
+Size:3
+Class_id:1
+Pattern6
+Size:0.1
+Class_id:5
