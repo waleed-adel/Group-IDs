@@ -85,7 +85,57 @@ def compare_group_mappings(base_group_map, compare_group_map):
     if base_groups_sorted == compare_groups_sorted:
         return True, create_group_id_mapping(base_group_map, compare_group_map)
     else:
-        return False, {}
+        # Detailed analysis in case of failure
+        failure_analysis = analyze_mismatched_groups(base_group_inverse, compare_group_inverse)
+        return False, failure_analysis
+
+"""
+Description:
+    Analyzes mismatches between the base and compare groupings.
+    Identifies groups that do not match, partially match, or are missing in one of the files.
+
+Args:
+    base_group_inverse (dict): Inverted groupings from the base file (group ID -> set of identifiers).
+    compare_group_inverse (dict): Inverted groupings from the compare file (group ID -> set of identifiers).
+
+Returns:
+    dict: A dictionary containing detailed information about mismatched groups.
+"""
+def analyze_mismatched_groups(base_group_inverse, compare_group_inverse):
+    mismatches = {
+        'missing_in_base': [],
+        'missing_in_compare': [],
+        'partially_matched': []
+    }
+
+    # Check for groups in base but not in compare
+    for base_group_id, base_identifiers in base_group_inverse.items():
+        found_match = False
+        for compare_group_id, compare_identifiers in compare_group_inverse.items():
+            if base_identifiers == compare_identifiers:
+                found_match = True
+                break
+            elif base_identifiers & compare_identifiers:  # Partial match (some common identifiers)
+                mismatches['partially_matched'].append({
+                    'base_group_id': base_group_id,
+                    'compare_group_id': compare_group_id,
+                    'common_identifiers': base_identifiers & compare_identifiers,
+                    'missing_in_compare': base_identifiers - compare_identifiers
+                })
+        if not found_match:
+            mismatches['missing_in_compare'].append(base_group_id)
+
+    # Check for groups in compare but not in base
+    for compare_group_id, compare_identifiers in compare_group_inverse.items():
+        found_match = False
+        for base_group_id, base_identifiers in base_group_inverse.items():
+            if compare_identifiers == base_identifiers:
+                found_match = True
+                break
+        if not found_match:
+            mismatches['missing_in_base'].append(compare_group_id)
+
+    return mismatches
 
 """
     Description:
@@ -125,13 +175,25 @@ def create_group_id_mapping(base_group_map, compare_group_map):
     return group_id_mapping
 
 """
-    Description:
-        The main function that handles argument parsing, file parsing, and comparison of groupings.
-    Args:
-        None
-    Returns:
-        None
+Description:
+    Prints detailed information about the groupings that do not match.
+
+Args:
+    mismatch_details (dict): A dictionary containing mismatched groups, missing groups, and partial matches.
 """
+def print_failure_analysis(mismatch_details):
+    
+    print("Detailed Analysis:")
+    print(f"Missing in base: {mismatch_details['missing_in_base']}")
+    print(f"Missing in compare: {mismatch_details['missing_in_compare']}")
+    
+    for partial_match in mismatch_details['partially_matched']:
+        print(f"Partial match between base group {partial_match['base_group_id']} "
+              f"and compare group {partial_match['compare_group_id']}:")
+        print(f"  Common identifiers: {partial_match['common_identifiers']}")
+        print(f"  Missing in compare: {partial_match['missing_in_compare']}")
+
+
 def main():
     args = parse_arguments()
 
@@ -147,15 +209,17 @@ def main():
         exit(1)
 
     # Compare the groupings
-    result, group_mapping = compare_group_mappings(base_group_map, compare_group_map)
-    
+    result, output = compare_group_mappings(base_group_map, compare_group_map)
+
     if result:
-        print("Groupings match!")
-        print(f"Group ID Mapping: {group_mapping}")
-        exit(0)
+        print("Success: Groupings match!")
+        print(f"Group ID Mapping: {output}")
+        exit(0)  # Success exit code
     else:
-        print("Groupings do not match!")
-        exit(1)
+        print("Failure: Groupings do not match!")
+        print_failure_analysis(output)
+        exit(1)  # Failure exit code
+
 
 if __name__ == "__main__":
     main()
