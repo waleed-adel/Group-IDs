@@ -108,14 +108,73 @@ python group_id_compare.py -base_file file1.txt -compare_file file2.txt -type tx
 - **Failure**: If the groupings do not match, the script prints an error message and exits with status code `1`.
 
 
-## Testing
+## Automated Testing
 
+This project includes a comprehensive set of tests to ensure the correctness and reliability of the Group ID Comparison Script. 
+The tests cover various functionalities such as CSV and TXT file loading, group comparison, error handling, and input validation.
 To ensure the script works correctly, test it with:
-- Different input formats (`CSV` and `TXT`).
-- Various grouping combinations.
-- Large datasets to assess performance.
 
-### Example Test Case:
+
+
+### 1. **Dependencies**:
+Before running the tests, ensure you have the following Python packages installed:
+
+```bash
+pip install pytest pytest-html pytest-mock
+```
+
+These dependencies include:
+- pytest: To run the test cases.
+- pytest-html: To generate an HTML report of the test results.
+- pytest-mock: To mock certain behaviors during testing.
+
+### 2. **Running the Tests**:
+You can run the tests using pytest by following these steps:
+
+1- Navigate to the directory where the test file is located.
+2- Run the following command to execute all the test cases:
+
+```bash
+cd tests
+pytest automated_test_cases.py
+```
+This will execute the entire test suite.
+
+### 3. **Generating Test Reports**:
+You can generate a detailed HTML report of the test results by using the following command:
+
+```bash
+pytest --html=../output/test_report.html --self-contained-html automated_test_cases.py
+```
+This will generate a report in ../output/test_report.html, which you can open in a browser to view the test results.
+
+### 4. **Code Coverage**:
+To check how much of the code is covered by the tests, you can run the following command:
+
+```bash
+coverage run --source=../src -m pytest automated_test_cases.py
+```
+
+To generate an HTML coverage report:
+
+```bash
+coverage html -d ../output/coverage
+```
+
+You can open the coverage report located in ../output/coverage/index.html to check which parts of the code are covered by the tests.
+
+
+### 5. **Test Categories**:
+The test cases are divided into the following categories:
+
+- CSV and TXT Loading and Validation: Tests the loading of CSV and TXT files, ensuring proper error handling for missing columns, group properties, and invalid formats.
+- Group Comparison and Error Handling: Tests the comparison of group IDs between base and comparison files.
+- Input Validation: Tests to ensure that the script validates input files correctly based on the file type (CSV or TXT) and handles file type mismatches.
+- Main Function Execution: Tests the main execution flow of the script, ensuring correct handling of input arguments and proper functionality.
+
+By following these instructions, you can validate that the Group ID Comparison Script works as expected and ensure the reliability of its functionalities.
+
+### 6. **Example Test Case:**:
 
 **Input:**
 - Base file (`file1.csv`):
