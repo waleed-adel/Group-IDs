@@ -1,0 +1,6 @@
+Pattern1
+Size 0.1
+Class_id 1
+Pattern2
+Size 23
+Class_id 2

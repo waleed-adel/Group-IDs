@@ -1,0 +1,3 @@
+Pattern1
+Size: 0.1
+Class_id: 1
