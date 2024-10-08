@@ -108,6 +108,134 @@ python group_id_compare.py -base_file file1.txt -compare_file file2.txt -type tx
 - **Failure**: If the groupings do not match, the script prints an error message and exits with status code `1`.
 
 
+## Algorithm: Group ID Comparison
+The Group ID Comparison algorithm compares groupings of identifiers between two files (CSV or TXT) and outputs whether the groupings match. If the groupings match, it also creates a mapping of group IDs between the two files.
+
+The algorithm consists of several stages:
+### 1. **Input Parsing and Validation**:
+The first step is to parse and validate the input files and arguments provided by the user.
+
+- Command-Line Arguments: The user provides the paths to the base file and comparison file, the file type (either CSV or TXT), and the property names to be compared.
+
+  - Base File: The golden file that serves as the reference for comparison.
+  - Compare File: The file whose groupings are being compared against the base file.
+  - File Type: Specifies whether the files are CSV or TXT.
+  - Property Names: For CSV, two properties (identifier and group ID) are required. For TXT, one property (group ID) is required.
+
+- Validation: The algorithm checks:
+
+  1. That the file types are correct (CSV or TXT).
+  2. That the correct number of property names are provided.
+  3. That the files have valid extensions based on the type.
+
+**Example:**
+```bash
+python group_id_compare.py -base_file file1.txt -compare_file file2.txt -type txt -property_names 'Class_id'
+```
+
+
+### 2. **File Loading and Grouping**:
+In this stage, the files are loaded and validated. The algorithm processes the CSV or TXT files to create a mapping between identifiers and their group IDs.
+
+**CSV File Processing**
+- For CSV files, two columns are expected: one for the identifier and one for the group ID.
+- The algorithm loads the CSV into a DataFrame and checks for missing values or required columns.
+
+**Example:**
+```
+IdentifierID,GroupID
+A,1
+B,2
+C,1
+```
+
+- **Output:** A dictionary mapping each identifier to its group ID:
+```
+{"A": "1", "B": "2", "C": "1"}
+```
+
+**TXT File Processing**
+- For TXT files, the algorithm expects lines that contain identifiers and group properties.
+- It extracts identifiers from lines without a colon (:) and group properties from lines that start with a specific prefix (e.g., GroupID: 1).
+```
+Pattern1
+Class_id: 1
+Pattern2
+Class_id: 2
+Pattern3
+Class_id: 1
+```
+
+- **Output:** A dictionary mapping identifiers to group IDs:
+```
+{"Pattern1": "1", "Pattern2": "2", "Pattern3": "1"}
+```
+
+### 3. **Grouping Identifiers by Group ID**:
+The algorithm then groups identifiers by their group IDs. This stage inverts the dictionary from the previous step, creating sets of identifiers for each group ID.
+
+- **Input:**
+```
+{"Pattern1": "1", "Pattern2": "2", "Pattern3": "1"}
+```
+
+- **Output:**
+```
+{"1": {"A", "C"}, "2": {"B"}}
+```
+This structure allows the algorithm to compare sets of identifiers rather than individual mappings.
+
+### 4. **Group Comparison**:
+In this stage, the algorithm compares the grouped identifiers between the base file and the comparison file. It checks if the sets of identifiers are the same between the two files, ignoring the actual group IDs.
+
+- The algorithm sorts the groups to ensure the comparison is consistent.
+
+**Example:**
+- **Base Grouping:**
+```
+{"1": {"A", "C"}, "2": {"B"}}
+```
+
+- **Comparison Grouping:**
+```
+{"10": {"A", "C"}, "20": {"B"}}
+```
+Since the sets of identifiers match, the groupings are considered equivalent, even though the group IDs themselves differ.
+
+### 5. **Group ID Mapping**:
+If the groupings match, the algorithm creates a mapping of group IDs between the base file and the comparison file. It matches the group IDs from the base file to the corresponding group IDs in the comparison file.
+
+- **Input:**
+```
+Base Group: {"1": {"A", "C"}, "2": {"B"}}
+Compare Group: {"10": {"A", "C"}, "20": {"B"}}
+```
+
+- **Output:**
+```
+{"1": "10", "2": "20"}
+```
+
+This mapping can be used to transform group IDs in the comparison file to match those in the base file.
+
+
+### 6. **Result Output**:
+Finally, the algorithm outputs whether the groupings match and, if they do, prints the group ID mapping.
+
+- **Success Example:**
+```
+Base Group: {"1": {"A", "C"}, "2": {"B"}}
+Compare Group: {"10": {"A", "C"}, "20": {"B"}}
+```
+
+- **Failure Example:**
+If the groupings do not match, the algorithm outputs:
+```
+Failure: Groupings do not match!
+```
+
+
+
 ## Automated Testing
 
 This project includes a comprehensive set of tests to ensure the correctness and reliability of the Group ID Comparison Script. 
