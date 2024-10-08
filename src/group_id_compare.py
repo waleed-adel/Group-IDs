@@ -17,6 +17,7 @@ def get_cli_arguments():
     parser.add_argument('-compare_file', required=True, help="Path to the file to compare against")
     parser.add_argument('-type', required=True, choices=['csv', 'txt'], help="File type: 'csv' or 'txt'")
     parser.add_argument('-property_names', nargs='+', required=True, help="Property names: 2 for CSV, 1 for TXT")
+    parser.add_argument('-output', required=False, help="Optional: Output file to save the terminal result")
     return parser.parse_args()
 
 """
@@ -233,13 +234,23 @@ def main():
     # Compare groupings and get the result and mappings
     result, group_id_mapping = compare_identifier_groups(base_identifier_to_group_map, compare_identifier_to_group_map)
 
+    # Capture output in a variable
+    output_message = ""
     if result:
-        print("Success: Groupings match!")
-        print(f"Group ID Mapping: {group_id_mapping}")
-        exit(0)
+        output_message += "Success: Groupings match!\n"
+        output_message += f"Group ID Mapping: {group_id_mapping}\n"
     else:
-        print("Failure: Groupings do not match!")
-        exit(1)
+        output_message += "Failure: Groupings do not match!\n"
+    
+    # Print to terminal
+    print(output_message)
+    
+    # If the user provides an output file, save the result
+    if args.output:
+        with open(args.output, 'w') as f:
+            f.write(output_message)
+
+    exit(0 if result else 1)
 
 
 if __name__ == "__main__":
